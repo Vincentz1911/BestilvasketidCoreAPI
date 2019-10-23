@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
+using System.Collections.Generic;
 using BestilVasketidCore.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace BestilVasketidCore.Controllers
 {
@@ -26,17 +23,32 @@ namespace BestilVasketidCore.Controllers
 
         // GET: api/User/5
         [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        public User Get(int id)
         {
+            SqlCommand cmd = new SqlCommand($"SELECT * from [user] WHERE id = @id");
+            cmd.Parameters.Add("@id", SqlDbType.Int);
+            cmd.Parameters["@ID"].Value = id;
 
-
-            return "value";
+            return dbt.Datatable2List<User>(dbt.SQL2Datatable(cmd))[0];
         }
 
         // POST: api/User
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromBody] User user)
         {
+            user.Timestamp = dbt.CreateTimeStamp();
+
+            SqlCommand cmd = new SqlCommand("INSERT INTO [user] VALUES" +
+                "(@email, @phone, @name, @password, @lastlogin, @timestamp");
+            cmd.Parameters.Add("@email", SqlDbType.NVarChar, 50).Value = user.Email;
+            //cmd.Parameters["@email"].Value = user.Email;
+            cmd.Parameters.AddWithValue("@phone", user.Phone);
+            cmd.Parameters.AddWithValue("@name", user.Name);
+            cmd.Parameters.AddWithValue("@password", user.Password);
+            cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
+            cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
+
+            dbt.ExecuteSQL(cmd);
         }
 
         // PUT: api/User/5

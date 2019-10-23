@@ -20,6 +20,20 @@ namespace BestilVasketidCore
             }
         }
 
+        public int ExecuteSQLGetID(SqlCommand cmd)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                cmd.Connection = connection;
+                SqlParameter parameter = new SqlParameter("@id", SqlDbType.Int);
+                parameter.Direction = ParameterDirection.Output;                
+                cmd.Parameters.Add(parameter);
+                cmd.Connection.Open();
+                cmd.ExecuteNonQuery();
+                return (int)parameter.Value;
+            }
+        }
+
         //Retrieves data from SQL as a datatable
         public DataTable SQL2Datatable(SqlCommand cmd)
         {
@@ -35,16 +49,22 @@ namespace BestilVasketidCore
             }
         }
 
+        internal int? CreateTimeStamp()
+        {
+            
+            throw new NotImplementedException();
+        }
+
         //Converts the datatable to list based on the item types
         public List<T> Datatable2List<T>(DataTable dt)
         {
-            List<T> data = new List<T>();
+            List<T> list = new List<T>();
             foreach (DataRow row in dt.Rows)
             {
                 T item = GetItem<T>(row);
-                data.Add(item);
+                list.Add(item);
             }
-            return data;
+            return list;
         }
 
         //Sets value from datatable row based on the column name
@@ -57,7 +77,9 @@ namespace BestilVasketidCore
             {
                 foreach (System.Reflection.PropertyInfo pro in temp.GetProperties())
                 {
-                    string[] split = column.ColumnName.ToLower().Split("_"); //Removes the _fk in sqlDB table columns
+                    //Removes the _fk from sqlDB table columns
+                    string[] split = column.ColumnName.ToLower().Split("_"); 
+                    //If property name = rows column name and is not DBNull, then add value
                     if (pro.Name.ToLower() == split[0] && dr[column.ColumnName] != DBNull.Value)
                         pro.SetValue(obj, dr[column.ColumnName], null);
                     else continue;
