@@ -50,7 +50,7 @@ namespace BestilVasketidCore.Controllers
             cmd.Parameters.AddWithValue("@name", user.Name);
             cmd.Parameters.AddWithValue("@password", user.Password);
             cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
-            cmd.Parameters.AddWithValue("@timestamp", user.Timestamp); //
+            cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
 
             int id = dbTools.ExecuteSQLGetID(cmd); //returns id of created user
         }
@@ -59,8 +59,8 @@ namespace BestilVasketidCore.Controllers
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] User user)
         {
-             SqlCommand cmd = new SqlCommand("UPDATE [user] SET email = @email, phone = @phone, name = @name, " +
-                 "password = @password, lastlogin = @lastlogin WHERE id = @id");
+            SqlCommand cmd = new SqlCommand("UPDATE [user] SET email = @email, phone = @phone, name = @name, " +
+                 "password = @password, lastlogin = @lastlogin OUTPUT timestamp WHERE id = @id");
             cmd.Parameters.AddWithValue("@id", id);
             cmd.Parameters.Add("@email", SqlDbType.NVarChar, 50);
             cmd.Parameters["@email"].Value = user.Email;
@@ -70,7 +70,7 @@ namespace BestilVasketidCore.Controllers
             cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
             //cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
 
-            dbTools.ExecuteSQL(cmd); //returns number of rows changed
+            int timestamp = dbTools.ExecuteSQLGetID(cmd); //returns number of rows changed
             dbTools.ChangeTimeStamp(id);
         }
 
