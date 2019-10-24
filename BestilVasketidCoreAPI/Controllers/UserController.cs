@@ -40,7 +40,7 @@ namespace BestilVasketidCore.Controllers
         [HttpPost]
         public void Post([FromBody] User user)
         {
-            user.Timestamp = dbTools.CreateTimeStamp();
+            user.Timestamp = dbTools.CreateTimeStamp(); // Creates a new timestamp
 
             SqlCommand cmd = new SqlCommand("INSERT INTO [user] (email, phone, name, password, lastlogin, timestamp_fk)" +
                 "OUTPUT INSERTED.id VALUES (@email, @phone, @name, @password, @lastlogin, @timestamp)");
@@ -52,7 +52,7 @@ namespace BestilVasketidCore.Controllers
             cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
             cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
 
-            int id = dbTools.ExecuteSQLGetID(cmd); //returns id of created user
+            int id = dbTools.ExecuteSQLGetID(cmd); //executes sqlcommand and returns id of created user
         }
 
         // PUT: api/User/5
@@ -70,7 +70,7 @@ namespace BestilVasketidCore.Controllers
             cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
             //cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
 
-            int timestamp = dbTools.ExecuteSQLGetID(cmd); //returns number of rows changed
+            int timestamp = dbTools.ExecuteSQLGetID(cmd); //executes sqlcommand and returns timestamp of user
             dbTools.ChangeTimeStamp(timestamp); //Updates timestamp with [change] value
         }
 
