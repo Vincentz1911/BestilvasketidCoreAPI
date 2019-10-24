@@ -60,7 +60,7 @@ namespace BestilVasketidCore.Controllers
         public void Put(int id, [FromBody] User user)
         {
             SqlCommand cmd = new SqlCommand("UPDATE [user] SET email = @email, phone = @phone, name = @name, " +
-                 "password = @password, lastlogin = @lastlogin OUTPUT timestamp WHERE id = @id");
+                 "password = @password, lastlogin = @lastlogin OUTPUT inserted.timestamp_fk WHERE id = @id");
             cmd.Parameters.AddWithValue("@id", id);
             cmd.Parameters.Add("@email", SqlDbType.NVarChar, 50);
             cmd.Parameters["@email"].Value = user.Email;
@@ -71,7 +71,7 @@ namespace BestilVasketidCore.Controllers
             //cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
 
             int timestamp = dbTools.ExecuteSQLGetID(cmd); //returns number of rows changed
-            dbTools.ChangeTimeStamp(id);
+            dbTools.ChangeTimeStamp(timestamp); //Updates timestamp with [change] value
         }
 
         // DELETE: api/ApiWithActions/5
@@ -80,8 +80,8 @@ namespace BestilVasketidCore.Controllers
         {
             SqlCommand cmd = new SqlCommand("DELETE [user] where id = @id");
             cmd.Parameters.AddWithValue("@id", id);
-            dbTools.ExecuteSQL(cmd);
-            dbTools.DeleteTimeStamp(id);
+            int timestamp = dbTools.ExecuteSQLGetID(cmd);
+            dbTools.DeleteTimeStamp(timestamp); //Updates timestamp with [deleted] value
         }
     }
 }
