@@ -9,54 +9,69 @@ namespace BestilVasketidCore
     {
         string connectionString = "Data Source=192.168.4.224;Initial Catalog=dbbestilvasketid.dk;User ID=sa;Password=Pass1234";
 
-        //Executes a normal sql query
-        public void ExecuteSQL(SqlCommand cmd)
+        internal int ExecuteSQL(SqlCommand cmd)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 cmd.Connection = connection;
                 cmd.Connection.Open();
-                cmd.ExecuteNonQuery();
+                
+                return cmd.ExecuteNonQuery(); //Returns rows changed
             }
         }
 
-        public int ExecuteSQLGetID(SqlCommand cmd)
+        internal int ExecuteSQLGetID(SqlCommand cmd)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 cmd.Connection = connection;
-                SqlParameter parameter = new SqlParameter("@id", SqlDbType.Int);
-                parameter.Direction = ParameterDirection.Output;                
-                cmd.Parameters.Add(parameter);
                 cmd.Connection.Open();
-                cmd.ExecuteNonQuery();
-                return (int)parameter.Value;
+
+                return (int)cmd.ExecuteScalar(); //Returns OUTPUT id
             }
+        }
+
+        internal int CreateTimeStamp()
+        {
+            SqlCommand cmd = new SqlCommand($"INSERT INTO [timestamp] (created) OUTPUT INSERTED.id VALUES (@timestamp)");
+            cmd.Parameters.AddWithValue("@timestamp", DateTime.Now);
+            return ExecuteSQLGetID(cmd);
+        }
+
+        internal void ChangeTimeStamp(int id)
+        {
+            SqlCommand cmd = new SqlCommand($"UPDATE [timestamp] SET changed = @timestamp WHERE id = @id");
+            cmd.Parameters.AddWithValue("@id", id);
+            cmd.Parameters.AddWithValue("@timestamp", DateTime.Now);
+            ExecuteSQL(cmd);
+        }
+
+        internal void DeleteTimeStamp(int id)
+        {
+            SqlCommand cmd = new SqlCommand($"UPDATE [timestamp] SET deleted = @timestamp WHERE id = @id");
+            cmd.Parameters.AddWithValue("@id", id);
+            cmd.Parameters.AddWithValue("@timestamp", DateTime.Now);
+            ExecuteSQL(cmd);
         }
 
         //Retrieves data from SQL as a datatable
-        public DataTable SQL2Datatable(SqlCommand cmd)
+        internal DataTable SQL2Datatable(SqlCommand cmd)
         {
-            DataTable dataTable = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 cmd.Connection = connection;
                 connection.Open();
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(dataTable);
-                da.Dispose();
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dataTable = new DataTable();
+                adapter.Fill(dataTable);
+                adapter.Dispose();
+
                 return dataTable;
             }
         }
 
-        internal int? CreateTimeStamp()
-        {
-            
-            throw new NotImplementedException();
-        }
-
         //Converts the datatable to list based on the item types
-        public List<T> Datatable2List<T>(DataTable dt)
+        internal List<T> Datatable2List<T>(DataTable dt)
         {
             List<T> list = new List<T>();
             foreach (DataRow row in dt.Rows)
@@ -78,7 +93,7 @@ namespace BestilVasketidCore
                 foreach (System.Reflection.PropertyInfo pro in temp.GetProperties())
                 {
                     //Removes the _fk from sqlDB table columns
-                    string[] split = column.ColumnName.ToLower().Split("_"); 
+                    string[] split = column.ColumnName.ToLower().Split("_");
                     //If property name = rows column name and is not DBNull, then add value
                     if (pro.Name.ToLower() == split[0] && dr[column.ColumnName] != DBNull.Value)
                         pro.SetValue(obj, dr[column.ColumnName], null);

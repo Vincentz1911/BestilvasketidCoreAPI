@@ -22,7 +22,7 @@ namespace BestilVasketidCore.Controllers
         }
 
         // GET: api/TimeStamp/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public TimeStamp Get(int id)
         {
             SqlCommand cmd = new SqlCommand($"SELECT * from [timestamp] WHERE id = @id");
@@ -38,7 +38,7 @@ namespace BestilVasketidCore.Controllers
         {
             SqlCommand cmd = new SqlCommand("INSERT INTO [timestamp] OUTPUT INSERTED.id (created) VALUES (@created)");
             cmd.Parameters.Add("@created", SqlDbType.DateTime).Value = System.DateTime.Now;                    
-            return dbt.ExecuteSQLGetID(cmd);
+            return dbt.ExecuteSQL(cmd);
         }
 
         // PUT: api/TimeStamp/5
