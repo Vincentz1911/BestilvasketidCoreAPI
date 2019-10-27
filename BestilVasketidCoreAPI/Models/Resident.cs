@@ -1,4 +1,4 @@
-﻿using BestilVasketidCore.Models;
+﻿using BestilVasketidCoreAPI.Models;
 
 namespace BestilVasketidCoreAPI.Models
 {
@@ -12,7 +12,7 @@ namespace BestilVasketidCoreAPI.Models
 
     public class DTO_Resident
     {
-        public int Id { get; set; }
+        public Resident Resident { get; set; }
         public User User { get; set; }
         public Address Address { get; set; }
         public TimeStamp Timestamp { get; set; }

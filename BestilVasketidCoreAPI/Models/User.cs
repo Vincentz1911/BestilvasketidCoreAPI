@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BestilVasketidCore.Models
+namespace BestilVasketidCoreAPI.Models
 {
     public class User
     {
@@ -11,5 +11,11 @@ namespace BestilVasketidCore.Models
         public string Password { get; set; }
         public DateTime LastLogin { get; set; }
         public int? Timestamp { get; set; }
+    }
+
+    public class DTOUser
+    {
+        public User user { get; set; }
+        public TimeStamp timestamp { get; set; }
     }
 }

@@ -3,11 +3,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 
-namespace BestilVasketidCore
+namespace BestilVasketidCoreAPI
 {
     public class DBTools
     {
-        string connectionString = "Data Source=192.168.4.224;Initial Catalog=dbbestilvasketid.dk;User ID=sa;Password=Pass1234";
+        //string connectionString = "Data Source=192.168.4.224;Initial Catalog=dbbestilvasketid.dk;User ID=sa;Password=Pass1234";
+        //string connectionString = "Data Source=.;Initial Catalog=dbbestilvasketid.dk;User ID=sa;Password=Pass1234";
+        string connectionString = @"Data Source = sql.freeasphost.net\MSSQL2016;Initial Catalog = bestilvasketid_db; Persist Security Info=True;User ID = bestilvasketid; Password=Pass1234";
 
         internal int ExecuteSQL(SqlCommand cmd)
         {

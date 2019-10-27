@@ -1,26 +1,37 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
-using BestilVasketidCore.Models;
+using BestilVasketidCoreAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BestilVasketidCore.Controllers
+namespace BestilVasketidCoreAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
         DBTools dbTools = new DBTools();
+        TimeStampCRUD ts = new TimeStampCRUD();
+        UserCRUD uc = new UserCRUD();
 
         // GET: api/User
         [HttpGet]
-        public List<User> Get()
+        public List<DTOUser> Get()
         {
-            SqlCommand cmd = new SqlCommand("SELECT * from [user]");
-            DataTable dataTable = dbTools.SQL2Datatable(cmd);
-            if (dataTable.Rows.Count > 0) return dbTools.Datatable2List<User>(dataTable);
-            else return null;
+            List<User> userlist = uc.UserList();
+            if (userlist == null) return null;
+
+            List<DTOUser> users = new List<DTOUser>();
+            foreach (var u in userlist)
+            {
+                TimeStamp t = null;
+                if (u.Timestamp == null) u.Timestamp = dbTools.CreateTimeStamp(); 
+                t = ts.ReadTimeStamp(u.Timestamp);
+              
+                users.Add(new DTOUser() { user = u, timestamp = t });
+            }
+            return users;
         }
 
         // GET: api/User/5
@@ -59,22 +70,25 @@ namespace BestilVasketidCore.Controllers
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] User user)
         {
-            SqlCommand cmd = new SqlCommand("UPDATE [user] SET email = @email, phone = @phone, name = @name, " +
-                 "password = @password, lastlogin = @lastlogin OUTPUT inserted.timestamp_fk WHERE id = @id");
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Parameters.Add("@email", SqlDbType.NVarChar, 50);
-            cmd.Parameters["@email"].Value = user.Email;
-            cmd.Parameters.AddWithValue("@phone", user.Phone);
-            cmd.Parameters.AddWithValue("@name", user.Name);
-            cmd.Parameters.AddWithValue("@password", user.Password);
-            cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
-            //cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
+            uc.UpdateUser(id, user);
 
-            int timestamp = dbTools.ExecuteSQLGetID(cmd); //executes sqlcommand and returns timestamp of user
-            dbTools.ChangeTimeStamp(timestamp); //Updates timestamp with [change] value
+
+            //SqlCommand cmd = new SqlCommand("UPDATE [user] SET email = @email, phone = @phone, name = @name, " +
+            //     "password = @password, lastlogin = @lastlogin OUTPUT inserted.timestamp_fk WHERE id = @id");
+            //cmd.Parameters.AddWithValue("@id", id);
+            //cmd.Parameters.Add("@email", SqlDbType.NVarChar, 50);
+            //cmd.Parameters["@email"].Value = user.Email;
+            //cmd.Parameters.AddWithValue("@phone", user.Phone);
+            //cmd.Parameters.AddWithValue("@name", user.Name);
+            //cmd.Parameters.AddWithValue("@password", user.Password);
+            //cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
+            ////cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
+
+            //int timestamp = dbTools.ExecuteSQLGetID(cmd); //executes sqlcommand and returns timestamp of user
+            //dbTools.ChangeTimeStamp(timestamp); //Updates timestamp with [change] value
         }
 
-        // DELETE: api/ApiWithActions/5
+        // DELETE: api/User/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

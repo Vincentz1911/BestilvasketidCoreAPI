@@ -1,4 +1,4 @@
-﻿using BestilVasketidCore.Models;
+﻿using BestilVasketidCoreAPI.Models;
 using System;
 
 namespace BestilVasketidCoreAPI.Models

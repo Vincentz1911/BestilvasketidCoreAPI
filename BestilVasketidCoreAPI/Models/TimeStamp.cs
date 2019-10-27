@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BestilVasketidCore.Models
+namespace BestilVasketidCoreAPI.Models
 {
     public class TimeStamp
     {
