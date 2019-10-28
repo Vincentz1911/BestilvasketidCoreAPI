@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using BestilVasketidCoreAPI.Models;
 
 namespace BestilVasketidCoreAPI
 {
@@ -11,26 +12,16 @@ namespace BestilVasketidCoreAPI
         //string connectionString = "Data Source=.;Initial Catalog=dbbestilvasketid.dk;User ID=sa;Password=Pass1234";
         string connectionString = @"Data Source = sql.freeasphost.net\MSSQL2016;Initial Catalog = bestilvasketid_db; Persist Security Info=True;User ID = bestilvasketid; Password=Pass1234";
 
-        internal int ExecuteSQL(SqlCommand cmd)
+        #region Timestamp
+        internal TimeStamp GetTimeStamp(int? id)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                cmd.Connection = connection;
-                cmd.Connection.Open();
-                
-                return cmd.ExecuteNonQuery(); //Returns rows changed
-            }
-        }
+            SqlCommand cmd = new SqlCommand("SELECT * from [timestamp] WHERE id = @id");
+            cmd.Parameters.Add("@id", SqlDbType.Int);
+            cmd.Parameters["@ID"].Value = id;
 
-        internal int ExecuteSQLGetID(SqlCommand cmd)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                cmd.Connection = connection;
-                cmd.Connection.Open();
-
-                return (int)cmd.ExecuteScalar(); //Returns OUTPUT id
-            }
+            DataTable dataTable = SQL2Datatable(cmd);
+            if (dataTable.Rows.Count > 0) return Datatable2List<TimeStamp>(dataTable)[0];
+            else return null;
         }
 
         internal int CreateTimeStamp()
@@ -48,12 +39,44 @@ namespace BestilVasketidCoreAPI
             ExecuteSQL(cmd);
         }
 
-        internal void DeleteTimeStamp(int id)
+        //Updates timestamp with delete datetime
+        internal void SetDeleteTimeStamp(int id)
         {
             SqlCommand cmd = new SqlCommand($"UPDATE [timestamp] SET deleted = @timestamp WHERE id = @id");
             cmd.Parameters.AddWithValue("@id", id);
             cmd.Parameters.AddWithValue("@timestamp", DateTime.Now);
             ExecuteSQL(cmd);
+        }
+
+        //Deletes timestamp completely
+        internal int DeleteTimeStamp(int id)
+        {
+            SqlCommand cmd = new SqlCommand($"DELETE FROM [timestamp] WHERE id = @id");
+            cmd.Parameters.AddWithValue("@id", id);
+            return ExecuteSQL(cmd);
+        }
+        #endregion
+
+        internal int ExecuteSQL(SqlCommand cmd)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                cmd.Connection = connection;
+                cmd.Connection.Open();
+
+                return cmd.ExecuteNonQuery(); //Returns rows changed
+            }
+        }
+
+        internal int ExecuteSQLGetID(SqlCommand cmd)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                cmd.Connection = connection;
+                cmd.Connection.Open();
+                var v = cmd.ExecuteScalar();
+                return (int)v; //Returns OUTPUT id
+            }
         }
 
         //Retrieves data from SQL as a datatable

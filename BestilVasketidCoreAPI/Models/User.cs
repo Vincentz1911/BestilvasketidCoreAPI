@@ -13,7 +13,7 @@ namespace BestilVasketidCoreAPI.Models
         public int? Timestamp { get; set; }
     }
 
-    public class DTOUser
+    public class DTO_User
     {
         public User user { get; set; }
         public TimeStamp timestamp { get; set; }

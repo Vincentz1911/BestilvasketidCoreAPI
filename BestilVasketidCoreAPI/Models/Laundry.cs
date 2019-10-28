@@ -15,4 +15,12 @@ namespace BestilVasketidCoreAPI.Models
         public int TimeStamp { get; set; }
         public int Address { get; set; }
     }
+
+    public class DTO_Laundry
+    {
+        public Laundry laundry { get; set; }
+        public LandryStatus landryStatus { get; set; }
+        public TimeStamp timeStamp { get; set; }
+        public Address address { get; set; }
+    }
 }

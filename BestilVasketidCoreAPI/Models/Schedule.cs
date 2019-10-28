@@ -1,5 +1,4 @@
-﻿using BestilVasketidCoreAPI.Models;
-using System;
+﻿using System;
 
 namespace BestilVasketidCoreAPI.Models
 {
@@ -15,9 +14,8 @@ namespace BestilVasketidCoreAPI.Models
 
     public class DTO_Schedule
     {
-        public int Id { get; set; }
-        public DateTime Time { get; set; }
-        public int Status { get; set; }
+        public Schedule Schedule { get; set; }
+        public ScheduleStatus Status { get; set; }
         public User User { get; set; }
         public TimeStamp TimeStamp { get; set; }
         public Machine Machine { get; set; }
