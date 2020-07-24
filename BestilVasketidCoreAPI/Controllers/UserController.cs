@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using BestilVasketidCoreAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +10,7 @@ namespace BestilVasketidCoreAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("CorsPolicy")]
     public class UserController : ControllerBase
     {
         DBTools dbTools = new DBTools();
@@ -14,54 +18,80 @@ namespace BestilVasketidCoreAPI.Controllers
 
         // GET: api/User
         [HttpGet]
-        public List<DTO_User> Get()
+        public List<User> Get()
         {
-            List<User> userlist = uc.UserList();
-            if (userlist == null) return null;
-
-            List<DTO_User> users = new List<DTO_User>();
-            foreach (var u in userlist)
-            {
-                TimeStamp t = null;
-                if (u.Timestamp == null) u.Timestamp = dbTools.CreateTimeStamp(); 
-                t = dbTools.GetTimeStamp(u.Timestamp);
-              
-                users.Add(new DTO_User() { user = u, timestamp = t });
-            }
-            return users;
+            return uc.UserList();
         }
 
-        // GET: api/User/5
-        [HttpGet("{id}", Name = "GetById")]
-        public DTO_User GetUser(int id)
-        {
-            User u = uc.GetUserById(id);
-            TimeStamp t = dbTools.GetTimeStamp(u.Timestamp);
-            DTO_User user = new DTO_User() { user = u, timestamp = t};
+        //// GET: api/User/5
+        //[HttpGet("{id}", Name = "GetById")]
+        //public User GetUser(int id)
+        //{
+        //    return uc.GetUserById(id);
+        //}
 
-            return user;
+        //// GET: api/User/email/xx@xx.xx
+        //[HttpGet("email/{email}", Name = "GetUserByEmail")]
+        //public User GetUserByEmail(string email)
+        //{
+        //    return uc.GetUserByEmail(email);      
+        //}
+
+        // GET: api/User/login + [Body]
+        //[HttpPost("login/{id}", Name = "CanLogin")]
+        //public HttpResponseMessage GetLogin([FromBody] LoginUser login)
+        //{
+        //    User user = uc.GetUserByEmail(login.Email);
+        //    if (user == null || login.Password != user.Password) return BadRequest();
+        //    else Request.CreateResponse(HttpStatusCode.Created, model); ;
+        //}
+
+        [EnableCors("CorsPolicy")]
+        [HttpPost("login", Name = "CanLogin")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult<User> GetUser([FromBody] LoginUser login)
+        {
+            User user = uc.GetUserByEmail(login.Email);
+
+            if (user == null || login.Password != user.Password) return BadRequest();
+            return Ok(user);
+
+            //return CreatedAtActionResult(user);
+            //pet.Id = _petsInMemoryStore.Any() ? _petsInMemoryStore.Max(p => p.Id) + 1 : 1;
+            //_petsInMemoryStore.Add(pet);
+
+            //return CreatedAtAction(nameof(GetById), new { id = pet.Id }, pet);
         }
 
-        // POST: api/User (Returns ID of user created)
-        [HttpPost]
-        public int Post([FromBody] DTO_User dto_user)
-        {
-            return uc.CreateUser(dto_user.user);
-        }
 
-        // PUT: api/User/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] DTO_User dto_user)
-        {
-            uc.UpdateUser(id, dto_user.user);
 
-        }
+        //[HttpGet("emailexists/{email}", Name = "GetUserExistsByEmail")]
+        //public bool GetUserExistsByEmail(string email)
+        //{
+        //    return uc.GetUserExistsByEmail(email);
+        //}
 
-        // DELETE: api/User/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-            uc.DeleteUser(id);
-        }
+        //// POST: api/User (Returns ID of user created)
+        //[HttpPost]
+        //public int Post([FromBody] User user)
+        //{
+        //    return uc.CreateUser(user);
+        //}
+
+        //// PUT: api/User/5
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] User user)
+        //{
+        //    uc.UpdateUser(id, user);
+
+        //}
+
+        //// DELETE: api/User/5
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //    uc.DeleteUser(id);
+        //}
     }
 }

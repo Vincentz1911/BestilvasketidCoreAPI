@@ -1,4 +1,5 @@
 ﻿using BestilVasketidCoreAPI.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -8,21 +9,22 @@ namespace BestilVasketidCoreAPI.Controllers
 {
     public class UserCRUD
     {
-        DBTools dbTools = new BestilVasketidCoreAPI.DBTools();
+        DBTools dbTools = new DBTools();
 
         internal int CreateUser(User user)
         {
-            user.Timestamp = dbTools.CreateTimeStamp(); // Creates a new timestamp
+            //user.Timestamp = dbTools.CreateTimeStamp(); // Creates a new timestamp
 
-            SqlCommand cmd = new SqlCommand("INSERT INTO [user] (email, phone, name, password, lastlogin, timestamp_fk)" +
-    "OUTPUT INSERTED.id VALUES (@email, @phone, @name, @password, @lastlogin, @timestamp)");
+            SqlCommand cmd = new SqlCommand("INSERT INTO [user] (email, phone, name, password, lastlogin, created, changed, deleted)" +
+                "OUTPUT INSERTED.id VALUES (@email, @phone, @name, @password, @lastlogin, created, changed, deleted)");
             cmd.Parameters.Add("@email", SqlDbType.NVarChar, 50);
             cmd.Parameters["@email"].Value = user.Email;
             cmd.Parameters.AddWithValue("@phone", user.Phone);
             cmd.Parameters.AddWithValue("@name", user.Name);
             cmd.Parameters.AddWithValue("@password", user.Password);
             cmd.Parameters.AddWithValue("@lastlogin", user.LastLogin);
-            cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
+            cmd.Parameters.AddWithValue("@created", DateTime.Now);
+            //cmd.Parameters.AddWithValue("@timestamp", user.Timestamp);
 
             return dbTools.ExecuteSQLGetID(cmd); //executes sqlcommand and returns id of created user
         }
@@ -45,7 +47,26 @@ namespace BestilVasketidCoreAPI.Controllers
             if (dataTable.Rows.Count > 0) return dbTools.Datatable2List<User>(dataTable)[0];
             else return null;
         }
-    
+
+        internal User GetUserByEmail(string email)
+        {
+            SqlCommand cmd = new SqlCommand("SELECT * from [user] WHERE email = @email");
+            cmd.Parameters.Add("@email", SqlDbType.NVarChar);
+            cmd.Parameters["@EMAIL"].Value = email;
+
+            DataTable dataTable = dbTools.SQL2Datatable(cmd);
+            if (dataTable.Rows.Count > 0) return dbTools.Datatable2List<User>(dataTable)[0];
+            else return null;
+        }
+
+        internal bool GetUserExistsByEmail(string email)
+        {
+            SqlCommand cmd = new SqlCommand("SELECT * from [user] WHERE email = @email");
+            cmd.Parameters.Add("@email", SqlDbType.NVarChar);
+            cmd.Parameters["@EMAIL"].Value = email;
+            DataTable dataTable = dbTools.SQL2Datatable(cmd);
+            if (dataTable.Rows.Count > 0) return true; else return false;
+        }
 
         internal void UpdateUser(int id, User user)
         {

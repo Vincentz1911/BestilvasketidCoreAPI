@@ -19,7 +19,7 @@ namespace BestilVasketidCoreAPI.Controllers
             else return null;
         }
 
-        internal TimeStamp ReadTimeStamp(int? id)
+        internal TimeStamp ReadTimeStamp(int id)
         {
             SqlCommand cmd = new SqlCommand("SELECT * from [timestamp] WHERE id = @id");
             cmd.Parameters.Add("@id", SqlDbType.Int);

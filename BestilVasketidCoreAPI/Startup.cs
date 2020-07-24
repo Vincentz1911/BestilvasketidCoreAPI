@@ -26,6 +26,18 @@ namespace BestilVasketidCoreAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder =>
+                    {
+                        //builder.WithOrigins("http://bestilvasketid.tk",
+                        //                    "http://bestilvasketid.ml");
+                        builder.AllowAnyHeader();
+                        builder.AllowAnyOrigin();
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,6 +51,8 @@ namespace BestilVasketidCoreAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
